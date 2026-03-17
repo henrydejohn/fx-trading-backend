@@ -7,8 +7,10 @@ import { UserRepository } from '@infrastructure/database/repositories/user.repos
 import { UserSessionRepository } from '@infrastructure/database/repositories/user-session.repository';
 import { USER_SESSION_REPOSITORY } from '@domain/repositories/user-session.repository.interface';
 import { USER_REPOSITORY } from '@domain/repositories/user.repository.interface';
+import { Wallet } from '@domain/entities/wallet.entity';
+import { WalletBalance } from '@domain/entities/wallet-balance.entity';
 
-const entities = [User, UserSession];
+const entities = [User, UserSession, Wallet, WalletBalance];
 const repositories = [
   { provide: USER_REPOSITORY, useClass: UserRepository },
   { provide: USER_SESSION_REPOSITORY, useClass: UserSessionRepository },

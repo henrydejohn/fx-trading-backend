@@ -14,6 +14,11 @@ export default () => ({
     port: parseInt(process.env.REDIS_PORT ?? '6379', 10),
   },
 
+  resend: {
+    apiKey: process.env.RESEND_API_KEY ?? 'resend-api-key',
+    emailFrom: process.env.EMAIL_FROM,
+  },
+
   jwt: {
     secret: process.env.JWT_SECRET ?? 'dev-secret',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '10m',
@@ -45,9 +50,5 @@ export default () => ({
   fx: {
     apiKey: process.env.FX_API_KEY ?? '',
     baseUrl: process.env.FX_API_BASE_URL ?? 'https://www.exchangerate-api.com',
-  },
-
-  resend: {
-    apiKey: process.env.RESEND_API_KEY ?? '',
   },
 });

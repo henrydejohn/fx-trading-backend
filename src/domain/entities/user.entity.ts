@@ -19,7 +19,7 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   hashedPassword: string;
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING })
