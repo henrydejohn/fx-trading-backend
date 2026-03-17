@@ -21,6 +21,27 @@ export default () => ({
     refrehsExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
   },
 
+  security: {
+    tokenHashSecret: process.env.REFRESH_TOKEN_HASH_SECRET ?? 'dev-token-hash-secret',
+  },
+
+  session: {
+    inactivitySeconds: parseInt(process.env.SESSION_INACTIVITY_SECONDS ?? '600', 10),
+    hardCapDays: parseInt(process.env.SESSION_HARD_CAP_DAYS ?? '30', 10),
+  },
+
+  otp: {
+    registrationTtlSeconds: 600,
+    loginTtlSeconds: 300,
+    registrationMaxAttempts: 5,
+    loginMaxAttempts: 3,
+    registrationLockSeconds: 900,
+    loginLockSeconds: 1800,
+    resendWindowSeconds: 1800,
+    resendMaxCount: 3,
+    registrationTokenTtlSeconds: 900,
+  },
+
   fx: {
     apiKey: process.env.FX_API_KEY ?? '',
     baseUrl: process.env.FX_API_BASE_URL ?? 'https://www.exchangerate-api.com',
