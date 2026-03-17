@@ -23,6 +23,9 @@
       "@modules/*": ["src/modules/*"],
       "@common/*": ["src/common/*"],
       "@config/*": ["src/config/*"]
-    }
+    },
+
+    "jsx": "react-jsx",
+    "esModuleInterop": true
   }
 }

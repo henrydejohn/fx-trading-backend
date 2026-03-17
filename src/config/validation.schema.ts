@@ -18,7 +18,7 @@ export const validationSchema = Joi.object({
   JWT_REFRESH_SECRET: Joi.string().required(),
   JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
 
-  TOKEN_HASH_SECRET: Joi.string().min(32).required(),
+  REFRESH_TOKEN_HASH_SECRET: Joi.string().min(32).required(),
 
   SESSION_INACTIVE_SECONDES: Joi.number().default(600),
   SESSION_HARD_CAP_DAYS: Joi.number().default(1),
@@ -27,4 +27,5 @@ export const validationSchema = Joi.object({
   FX_API_BASE_URL: Joi.string().required(),
 
   RESEND_API_KEY: Joi.string().required(),
+  EMAIL_FROM: Joi.string().required(),
 });

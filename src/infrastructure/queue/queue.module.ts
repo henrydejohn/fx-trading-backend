@@ -1,6 +1,8 @@
 import { Module, Global } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailProcessor } from '@infrastructure/queue/processors/mail.processor';
+import { ResendService } from '@infrastructure/external/mailer/resend.service';
 
 export const WALLET_QUEUE = 'wallet';
 export const MAILER_QUEUE = 'mailer';
@@ -29,6 +31,7 @@ export const MAILER_QUEUE = 'mailer';
     }),
     BullModule.registerQueue({ name: WALLET_QUEUE }, { name: MAILER_QUEUE }),
   ],
+  providers: [MailProcessor, ResendService],
   exports: [BullModule],
 })
 export class QueueModule {}

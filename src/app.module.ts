@@ -7,6 +7,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseModule } from '@infrastructure/database/database.module';
 import { RedisModule } from '@infrastructure/cache/redis.module';
 import { QueueModule } from '@infrastructure/queue/queue.module';
+import { AuthModule } from '@modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { QueueModule } from '@infrastructure/queue/queue.module';
     DatabaseModule,
     RedisModule,
     QueueModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
