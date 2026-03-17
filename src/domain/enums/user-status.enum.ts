@@ -1,0 +1,5 @@
+export enum UserStatus {
+  PENDING = 'PENDING',
+  EMAIL_VERIFIED = 'EMAIL_VERIFIED',
+  VERIFIED = 'VERIFIED',
+}

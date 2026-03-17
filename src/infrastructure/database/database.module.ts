@@ -1,6 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { User } from '@domain/entities/user.entity';
+import { UserSession } from '@domain/entities/user-session.entity';
+import { UserRepository } from '@infrastructure/database/repositories/user.repository';
+import { UserSessionRepository } from '@infrastructure/database/repositories/user-session.repository';
+import { USER_SESSION_REPOSITORY } from '@domain/repositories/user-session.repository.interface';
+import { USER_REPOSITORY } from '@domain/repositories/user.repository.interface';
+
+const entities = [User, UserSession];
+const repositories = [
+  { provide: USER_REPOSITORY, useClass: UserRepository },
+  { provide: USER_SESSION_REPOSITORY, useClass: UserSessionRepository },
+];
 
 @Module({
   imports: [
@@ -14,7 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         username: config.get<string>('database.username'),
         password: config.get<string>('database.password'),
         database: config.get<string>('database.name'),
-        entities: [__dirname + '/../../domain/entities/*.entity{}'],
+        entities,
         synchronize: config.get<string>('nodeEnv') === 'development',
         logging: config.get<string>('nodeEnv') === 'development',
         extra: {
@@ -24,6 +36,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         },
       }),
     }),
+    TypeOrmModule.forFeature(entities),
   ],
+  providers: repositories,
+  exports: repositories,
 })
 export class DatabaseModule {}
