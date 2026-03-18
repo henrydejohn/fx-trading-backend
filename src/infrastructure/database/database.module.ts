@@ -10,11 +10,15 @@ import { USER_REPOSITORY } from '@domain/repositories/user.repository.interface'
 import { Wallet } from '@domain/entities/wallet.entity';
 import { WalletBalance } from '@domain/entities/wallet-balance.entity';
 import { UserActivity } from '@domain/entities/user-activity.entity';
+import { TransactionRecord } from '@domain/entities/transaction-record.entity';
+import { WALLET_REPOSITORY } from '@domain/repositories/wallet.repository.interface';
+import { WalletRepository } from '@infrastructure/database/repositories/wallet.repository';
 
-const entities = [User, UserSession, Wallet, WalletBalance, UserActivity];
+const entities = [User, UserSession, Wallet, WalletBalance, UserActivity, TransactionRecord];
 const repositories = [
   { provide: USER_REPOSITORY, useClass: UserRepository },
   { provide: USER_SESSION_REPOSITORY, useClass: UserSessionRepository },
+  { provide: WALLET_REPOSITORY, useClass: WalletRepository },
 ];
 
 @Module({
