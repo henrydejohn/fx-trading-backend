@@ -9,6 +9,7 @@ import { RedisModule } from '@infrastructure/cache/redis.module';
 import { QueueModule } from '@infrastructure/queue/queue.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { ActivityModule } from '@infrastructure/activity/activity.module';
+import { WalletModule } from '@modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ActivityModule } from '@infrastructure/activity/activity.module';
     QueueModule,
     ActivityModule,
     AuthModule,
+    WalletModule,
   ],
 })
 export class AppModule {}

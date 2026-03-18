@@ -46,7 +46,7 @@ export class CompleteRegistrationUseCase {
       await manager.save(WalletBalance, {
         walletId: wallet.id,
         currency: Currency.NGN,
-        amount: 0,
+        amount: '0.000000',
         version: 0,
       });
 
