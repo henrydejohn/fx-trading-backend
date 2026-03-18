@@ -3,13 +3,15 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MailProcessor } from '@infrastructure/queue/processors/mail.processor';
 import { ResendService } from '@infrastructure/external/mailer/resend.service';
-
-export const WALLET_QUEUE = 'wallet';
-export const MAILER_QUEUE = 'mailer';
+import { ActivityProcessor } from '@infrastructure/queue/processors/activity.processor';
+import { ACTIVITY_QUEUE, MAILER_QUEUE, WALLET_QUEUE } from '@infrastructure/queue/queue.constants';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserActivity } from '@domain/entities/user-activity.entity';
 
 @Global()
 @Module({
   imports: [
+    TypeOrmModule.forFeature([UserActivity]),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -29,9 +31,13 @@ export const MAILER_QUEUE = 'mailer';
         },
       }),
     }),
-    BullModule.registerQueue({ name: WALLET_QUEUE }, { name: MAILER_QUEUE }),
+    BullModule.registerQueue(
+      { name: WALLET_QUEUE },
+      { name: MAILER_QUEUE },
+      { name: ACTIVITY_QUEUE },
+    ),
   ],
-  providers: [MailProcessor, ResendService],
+  providers: [MailProcessor, ResendService, ActivityProcessor],
   exports: [BullModule],
 })
 export class QueueModule {}

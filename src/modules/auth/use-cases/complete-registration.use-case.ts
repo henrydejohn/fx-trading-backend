@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { Currency } from '@domain/enums/currency.enum';
 import { AuthService } from '@modules/auth/auth.service';
 import { CompleteRegistrationDto } from '@modules/auth/dto/complete-registration.dto';
+import { ActivityService } from '@infrastructure/activity/activity.service';
 
 @Injectable()
 export class CompleteRegistrationUseCase {
@@ -17,6 +18,7 @@ export class CompleteRegistrationUseCase {
     private readonly redisService: RedisService,
     private readonly dataSource: DataSource,
     private readonly authService: AuthService,
+    private readonly activityService: ActivityService,
   ) {}
 
   async execute(dto: CompleteRegistrationDto) {
@@ -48,9 +50,14 @@ export class CompleteRegistrationUseCase {
         version: 0,
       });
 
-      await this.redisService.del(`reg_token:${email}`);
-
       return updatedUser;
+    });
+
+    // Log Successful Registration
+    this.activityService.log(email, 'auth.registration_completed', {
+      userId: user.id,
+      walletCreated: true,
+      currency: 'NGN',
     });
 
     return this.authService.getAuthResponse(user);

@@ -1,10 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { RedisService } from '@infrastructure/cache/redis.service';
 import { compareOtp, generateToken } from '@common/utils/security.util';
+import { ActivityService } from '@infrastructure/activity/activity.service';
 
 @Injectable()
 export class VerifyRegistrationOtpUseCase {
-  constructor(private readonly redisService: RedisService) {}
+  constructor(
+    private readonly redisService: RedisService,
+    private readonly activityService: ActivityService,
+  ) {}
 
   async execute(email: string, otp: string): Promise<{ registrationToken: string }> {
     const storedOtp = await this.redisService.get(`otp:${email}`);
@@ -25,6 +29,9 @@ export class VerifyRegistrationOtpUseCase {
 
     // Cleanup OTP immediately so it can't be reused
     await this.redisService.del(`otp:${email}`);
+
+    // Log Success
+    this.activityService.log(email, 'auth.otp_verified');
 
     return { registrationToken };
   }

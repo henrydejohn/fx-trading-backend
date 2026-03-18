@@ -8,6 +8,7 @@ import { DatabaseModule } from '@infrastructure/database/database.module';
 import { RedisModule } from '@infrastructure/cache/redis.module';
 import { QueueModule } from '@infrastructure/queue/queue.module';
 import { AuthModule } from '@modules/auth/auth.module';
+import { ActivityModule } from '@infrastructure/activity/activity.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from '@modules/auth/auth.module';
     DatabaseModule,
     RedisModule,
     QueueModule,
+    ActivityModule,
     AuthModule,
   ],
 })
