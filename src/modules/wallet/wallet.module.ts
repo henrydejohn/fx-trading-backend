@@ -17,6 +17,7 @@ import { Wallet } from '@domain/entities/wallet.entity';
 import { WalletBalance } from '@domain/entities/wallet-balance.entity';
 import { FundWalletUseCase } from '@modules/wallet/use-cases/fund-wallet.use-case';
 import { TransactionRecord } from '@domain/entities/transaction-record.entity';
+import { AddWalletUseCase } from '@modules/wallet/use-cases/add-new-wallet.use-case';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TransactionRecord } from '@domain/entities/transaction-record.entity';
     JwtAuthGuard,
     GetMyBalancesUseCase,
     FundWalletUseCase,
+    AddWalletUseCase,
     { provide: WALLET_REPOSITORY, useClass: WalletRepository },
   ],
   exports: [WALLET_REPOSITORY],
