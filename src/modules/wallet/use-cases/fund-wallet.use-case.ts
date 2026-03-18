@@ -12,6 +12,7 @@ import { TransactionRecord } from '@domain/entities/transaction-record.entity';
 import { TransactionType } from '@domain/enums/transaction-type.enum';
 import { TransactionStatus } from '@domain/enums/transaction-status.enum';
 import Decimal from 'decimal.js';
+import { TransactionDirection } from '@domain/enums/transaction-direction.enum';
 
 @Injectable()
 export class FundWalletUseCase {
@@ -49,6 +50,7 @@ export class FundWalletUseCase {
           walletId: wallet.id,
           reference,
           type: TransactionType.FUNDING,
+          direction: TransactionDirection.CREDIT,
           amount: amount.toString(),
           currency,
           status: TransactionStatus.SUCCESS,
@@ -93,12 +95,14 @@ export class FundWalletUseCase {
     reference: string,
     reason?: string,
   ) {
-    // Queue the Mailer
+    /* Plans to also setup mailing notifications for funding transactions
+
     await this.mailerQueue.add(
       'send-fund-notification',
       { userId, amount, currency, status, reason },
       { attempts: 3, backoff: { type: 'exponential', delay: 1000 } },
     );
+    */
 
     // Log Activity
     this.activityService.log(userId, `wallet.funding_${status}`, {
