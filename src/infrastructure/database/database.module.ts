@@ -9,8 +9,9 @@ import { USER_SESSION_REPOSITORY } from '@domain/repositories/user-session.repos
 import { USER_REPOSITORY } from '@domain/repositories/user.repository.interface';
 import { Wallet } from '@domain/entities/wallet.entity';
 import { WalletBalance } from '@domain/entities/wallet-balance.entity';
+import { UserActivity } from '@domain/entities/user-activity.entity';
 
-const entities = [User, UserSession, Wallet, WalletBalance];
+const entities = [User, UserSession, Wallet, WalletBalance, UserActivity];
 const repositories = [
   { provide: USER_REPOSITORY, useClass: UserRepository },
   { provide: USER_SESSION_REPOSITORY, useClass: UserSessionRepository },

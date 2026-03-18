@@ -2,7 +2,6 @@ import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { render } from '@react-email/render';
 import * as React from 'react';
-import { MAILER_QUEUE } from '../queue.module';
 import { ResendService } from '@infrastructure/external/mailer/resend.service';
 import { OtpEmail } from '@infrastructure/external/mailer/templates/otp-email';
 

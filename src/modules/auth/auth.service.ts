@@ -11,8 +11,6 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  // src/modules/auth/auth.service.ts
-
   async generateAccessToken(user: User): Promise<string> {
     const payload = {
       sub: user.id,

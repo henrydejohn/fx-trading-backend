@@ -5,12 +5,14 @@ import { USER_REPOSITORY, IUserRepository } from '@domain/repositories/user.repo
 import { UserStatus } from '@domain/enums/user-status.enum';
 import { RedisService } from '@infrastructure/cache/redis.service';
 import { generateOtp } from '@common/utils/security.util';
+import { ActivityService } from '@infrastructure/activity/activity.service';
 
 @Injectable()
 export class InitiateRegistrationUseCase {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepo: IUserRepository,
     private readonly redisService: RedisService,
+    private readonly activityService: ActivityService,
     @InjectQueue('mailer') private readonly mailerQueue: Queue,
   ) {}
 
@@ -36,6 +38,10 @@ export class InitiateRegistrationUseCase {
         backoff: { type: 'exponential', delay: 1000 },
       },
     );
+
+    this.activityService.log(email, 'auth.registration_initiated', {
+      email,
+    });
 
     return { message: 'Verification code sent to your email' };
   }
