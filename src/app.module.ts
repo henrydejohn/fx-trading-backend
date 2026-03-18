@@ -10,6 +10,7 @@ import { QueueModule } from '@infrastructure/queue/queue.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { ActivityModule } from '@infrastructure/activity/activity.module';
 import { WalletModule } from '@modules/wallet/wallet.module';
+import { TransactionModule } from '@modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { WalletModule } from '@modules/wallet/wallet.module';
     ActivityModule,
     AuthModule,
     WalletModule,
+    TransactionModule,
   ],
 })
 export class AppModule {}
