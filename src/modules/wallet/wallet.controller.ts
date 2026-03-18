@@ -4,6 +4,7 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { GetMyBalancesUseCase } from '@modules/wallet/use-cases/get-my-balances.use-case';
 import { FundWalletUseCase } from '@modules/wallet/use-cases/fund-wallet.use-case';
 import { Currency } from '@domain/enums/currency.enum';
+import { AddWalletUseCase } from '@modules/wallet/use-cases/add-new-wallet.use-case';
 
 @Controller('wallet')
 @UseGuards(JwtAuthGuard)
@@ -11,6 +12,7 @@ export class WalletController {
   constructor(
     private readonly getMyBalancesUseCase: GetMyBalancesUseCase,
     private readonly fundWalletUseCase: FundWalletUseCase,
+    private readonly addWalletUseCase: AddWalletUseCase,
   ) {}
 
   @Get()
@@ -24,5 +26,10 @@ export class WalletController {
     @Body() dto: { amount: number; currency: Currency; reference: string },
   ) {
     return await this.fundWalletUseCase.execute(userId, dto.amount, dto.currency, dto.reference);
+  }
+
+  @Post('add')
+  async add(@CurrentUser('id') userId: string, @Body() dto: { currency: Currency }) {
+    return await this.addWalletUseCase.execute(userId, dto.currency);
   }
 }

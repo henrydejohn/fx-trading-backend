@@ -1,9 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
-  IWalletRepository,
-  WALLET_REPOSITORY,
-} from '@domain/repositories/wallet.repository.interface';
-import {
   ITransactionRepository,
   TRANSACTION_REPOSITORY,
 } from '@domain/repositories/transaction.repository.interface';
@@ -15,21 +11,36 @@ export class GetMyTransactionsUseCase {
     private readonly transactionRepository: ITransactionRepository,
   ) {}
 
-  async execute(userId: string) {
-    const transactions = await this.transactionRepository.findByUserId(userId);
+  async execute(userId: string, limit: number = 10, cursor?: string) {
+    const transactions = await this.transactionRepository.findByUserId(userId, limit, cursor);
 
     if (!transactions) {
-      throw new NotFoundException('Transaction record not found for this account');
+      return {
+        data: [],
+        pageInfo: {
+          nextCursor: null,
+          hasNextPage: false,
+        },
+      };
     }
 
+    const hasNextPage = transactions.length > limit;
+    const edges = hasNextPage ? transactions.slice(0, limit) : transactions;
+    const nextCursor = hasNextPage ? edges[edges.length - 1].id : null;
+
     return {
-      transactions: transactions.map((t) => ({
+      data: edges.map((t) => ({
+        id: t.id,
         amount: t.amount,
         currency: t.currency,
         direction: t.direction,
         reference: t.reference,
         date: t.createdAt,
       })),
+      pageInfo: {
+        nextCursor,
+        hasNextPage,
+      },
     };
   }
 }
