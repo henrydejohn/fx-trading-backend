@@ -12,11 +12,20 @@ import { USER_REPOSITORY } from '@domain/repositories/user.repository.interface'
 import { UserRepository } from '@infrastructure/database/repositories/user.repository';
 import { User } from '@domain/entities/user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtAuthGuard } from '@modules/auth/guards/jwt-auth.guard';
+import { RefreshSessionUseCase } from '@modules/auth/use-cases/refresh-session.use-case';
+import { DatabaseModule } from '@infrastructure/database/database.module';
+import { RedisModule } from '@infrastructure/cache/redis.module';
+import { ActivityModule } from '@infrastructure/activity/activity.module';
+import { LogoutUseCase } from '@modules/auth/use-cases/logout.use-case';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
+    DatabaseModule,
+    RedisModule,
+    ActivityModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -29,12 +38,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   ],
   controllers: [AuthController],
   providers: [
-    { provide: USER_REPOSITORY, useClass: UserRepository },
     AuthService,
     JwtStrategy,
+    JwtAuthGuard,
     InitiateRegistrationUseCase,
     VerifyRegistrationOtpUseCase,
     CompleteRegistrationUseCase,
+    RefreshSessionUseCase,
+    LogoutUseCase,
   ],
   exports: [AuthService],
 })
