@@ -23,7 +23,7 @@ export default () => ({
     secret: process.env.JWT_SECRET ?? 'dev-secret',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '10m',
     refreshSecret: process.env.JWT_REFRESH_SECRET ?? 'dev-refresh-secret',
-    refrehsExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7',
   },
 
   security: {

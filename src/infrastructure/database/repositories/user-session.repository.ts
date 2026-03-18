@@ -28,9 +28,9 @@ export class UserSessionRepository implements IUserSessionRepository {
     return repo.save(session);
   }
 
-  async findByTokenHash(hashedRefreshToken: string): Promise<UserSession | null> {
+  async findBySessionId(sessionId: string): Promise<UserSession | null> {
     return this.repo.findOne({
-      where: { hashedRefreshToken, isActive: true },
+      where: { id: sessionId, isActive: true },
     });
   }
 
@@ -43,6 +43,14 @@ export class UserSessionRepository implements IUserSessionRepository {
 
   async updateLastUsedAt(id: string): Promise<void> {
     await this.repo.update(id, { lastUsedAt: new Date() });
+  }
+
+  async rotate(id: string, newHashedToken: string, newExpiresAt: Date): Promise<void> {
+    await this.repo.update(id, {
+      hashedRefreshToken: newHashedToken,
+      expiresAt: newExpiresAt,
+      lastUsedAt: new Date(),
+    });
   }
 
   async invalidate(id: string): Promise<void> {

@@ -12,11 +12,13 @@ export interface CreateSessionData {
 export interface IUserSessionRepository {
   create(data: CreateSessionData, manager?: EntityManager): Promise<UserSession>;
 
-  findByTokenHash(tokenHash: string): Promise<UserSession | null>;
+  findBySessionId(sessionId: string): Promise<UserSession | null>;
 
   findActiveByUserId(userId: string): Promise<UserSession[]>;
 
   updateLastUsedAt(id: string): Promise<void>;
+
+  rotate(id: string, newHashedToken: string, newExpiresAt: Date): Promise<void>;
 
   invalidate(id: string): Promise<void>;
 
