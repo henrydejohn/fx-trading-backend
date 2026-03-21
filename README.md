@@ -7,6 +7,12 @@ rate integration.
 The system is designed with **financial safety, concurrency protection,
 and scalability** in mind.
 
+> This system was built under a 48-hour constraint.
+> Every decision in it reflects a deliberate prioritisation:
+> get the financial safety primitives correct first,
+> build features on top of a trustworthy foundation second.
+> Incorrect money movement is worse than missing money movement.
+
 ------------------------------------------------------------------------
 
 # Quick Summary
@@ -26,17 +32,29 @@ and scalability** in mind.
 
 # Architecture Overview
 
-The system follows **Clean Architecture (Hexagonal Architecture)** to
-ensure business logic is independent of frameworks and infrastructure.
+The system follows Clean Architecture principles with three layers:
 
-### Layer Responsibilities
+**Domain Layer** (`src/domain/`)
+Pure business logic. Zero framework dependencies.
+Entities, enums, typed exceptions, and repository interfaces live here.
+A service can be extracted to a microservice without changing this layer.
 
-**Domain** - Business entities - Enums - Repository interfaces
+**Infrastructure Layer** (`src/infrastructure/`)
+Framework implementations. TypeORM repositories implement domain interfaces.
+BullMQ workers, Redis service, and external API clients live here.
+Swapping PostgreSQL for another database requires changes only in this layer.
 
-**Infrastructure** - Database implementations - External services
-(Redis, Mail) - Queue processors
+**Modules Layer** (`src/modules/`)
+NestJS HTTP delivery. Controllers translate HTTP requests into use case calls.
+Services contain use cases — one method per operation.
+Controllers contain zero business logic.
 
-**Modules** - NestJS controllers - Dependency injection wiring - Business logic (use cases) - Orchestration of domain operations
+**Dependency Rule:**
+Modules depend on domain interfaces.
+Infrastructure implements those interfaces.
+Domain depends on nothing.
+This makes every use case independently unit testable
+without spinning up a database or HTTP server.
 
 ------------------------------------------------------------------------
 
@@ -199,6 +217,9 @@ Start development server:
   POST     /auth/register/initiate    Begin Account Creation Flow and send OTP
   POST     /auth/register/verify-otp   Verify OTP and return Registration Token
   POST     /auth/register/complete      Complete Account Creation
+  POST     /auth/login                    Authenticate with email and password, receive access and refresh tokens
+  POST     /auth/refresh                   Exchange valid refresh token for new access token
+  POST     /auth/logout                     Terminate session and revoke all active tokens
 
 ------------------------------------------------------------------------
 
@@ -249,37 +270,83 @@ Rates are cached in Redis to reduce API calls.
 
 ------------------------------------------------------------------------
 
-# Assumptions
+# Assumptions and Tradeoffs
 
--   New users start with **zero wallet balance**
--   FX rates come from an external provider
--   Rates are cached in Redis
--   Database fallback ensures system uptime if FX API fails
--   Financial operations require **unique references**
+## Financial model
+Wallet balances are the operational hot layer for fast reads and
+concurrent writes. A full double-entry ledger (append-only, immutable)
+is the correct long-term model and is documented as the primary
+architectural evolution path. Implementing it within the assessment
+timeframe would have required sacrificing the concurrency and
+precision work that matters more at this stage.
+
+## FX rate freshness
+Rates cached in Redis with a staleness flag. Conversions reject
+requests when the cached rate exceeds the acceptable age threshold.
+The database snapshot provides a fallback when Redis is unavailable.
+
+## Session management 
+Sessions expire on inactivity rather than fixed duration.
+A fixed 7-day refresh token is unsafe for a financial platform —
+a stolen token has days of valid access. Inactivity expiry limits
+the attack window to the configured idle period.
+
+## Currency conversion
+The conversion endpoint architecture is designed and the
+FX rate infrastructure is in place. Full implementation
+was deprioritised to ensure the funded wallet, concurrency,
+and precision work was correct first. Incorrect money movement
+is worse than missing money movement.
 
 ------------------------------------------------------------------------
 
 # Security Considerations
 
--   JWT Access + Refresh token strategy
--   Password hashing with bcrypt
--   Idempotent financial operations
--   Row-level locking for wallet updates
+## Authentication
+- 3-stage registration (Initiate → Verify OTP → Complete)
+  prevents bot registrations and proves email ownership
+  before a password is ever set
+- JWT access tokens (short-lived)
+- Refresh tokens stored as HMAC-SHA-256 hashes in PostgreSQL
+  — raw token never persisted, hash is useless without server secret
+- Session inactivity timeout — idle sessions expire automatically
+  without requiring the user to explicitly log out
+- Constant-time OTP comparison prevents timing attacks
+
+## Financial Safety
+- Pessimistic row locking (SELECT FOR UPDATE) on all balance mutations
+- Idempotency keys with unique DB constraint prevent double processing
+- All amounts stored as NUMERIC(20,6) — no floating point in the DB
+- Decimal.js arithmetic for all calculations — zero rounding drift
 
 ------------------------------------------------------------------------
 
-# Possible Improvements
+# What I Would Build Next
 
--   Ledger-based accounting model
--   Distributed rate limiting
--   WebSocket FX streaming
--   Audit event pipeline
--   Multi-region deployment
+In priority order based on financial risk and product value:
 
-------------------------------------------------------------------------
+**1. Currency Conversion Endpoint**
+The FX rate infrastructure and wallet locking are already in place.
+The conversion logic performs an atomic debit/credit using the locked
+rate with Decimal.js precision.
+Deprioritised to ensure the financial safety primitives were solid first.
 
-# Final Notes
+**2. Double-Entry Ledger**
+Replace mutable wallet balances with an append-only ledger_entries table.
+Every balance change posts balanced DEBIT/CREDIT pairs.
+wallet_balance becomes a materialised view for fast reads.
+ledger_entries is the immutable source of truth.
 
-This implementation focuses on **financial safety, scalability, and
-clean system design**, making it suitable as a foundation for a
-**production FX trading backend**.
+**3. OTP Verification at Login**
+Currently login uses email and password only.
+OTP at login becomes an intrusion detection mechanism —
+if an attacker uses stolen credentials, the real user
+receives an OTP notification and knows immediately.
+The OTP infrastructure built for registration is directly reusable.
+
+**4. RabbitMQ for Microservice Extraction**
+BullMQ is the correct choice for this monorepo.
+At the point of microservice extraction, RabbitMQ becomes
+the stable interface between services.
+The domain layer and use cases require zero changes —
+only the transport wrapper changes.
